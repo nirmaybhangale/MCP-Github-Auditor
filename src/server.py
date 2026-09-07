@@ -1,10 +1,15 @@
 import json
-# Update 1: Import MCPServer instead of FastMCP
+import os
+from pathlib import Path
 from mcp.server.mcpserver import MCPServer 
 from pydantic import Field
 from src.github_client import GitHubClient
 
-# Update 2: Initialize MCPServer
+#Define the secure sandboxed directory for side effects ---
+REPORTS_DIR = Path.cwd() / "audit_reports"
+REPORTS_DIR.mkdir(exist_ok=True) # Create the directory if it doesn't exist
+
+#Initialize MCPServer
 mcp = MCPServer("OpenSourceAuditor")
 
 # Initialize our GitHub API Client
@@ -59,6 +64,37 @@ async def get_issue_details(
         return json.dumps(summarized, indent=2)
     except Exception as e:
         return f"Error fetching issues: {str(e)}"
+
+
+@mcp.tool()
+async def save_audit_report(
+    filename: str = Field(..., description="The name of the file to save (e.g., 'react_audit.md')"),
+    content: str = Field(..., description="The full markdown content of the codebase audit.")
+) -> str:
+    """
+    SIDE EFFECT: Saves the generated audit report to the local file system.
+    """
+    # 1. Refusal Boundary: Extension Check
+    if not filename.endswith(".md"):
+        return "REFUSED: System policy only permits saving Markdown (.md) files to prevent executable code injection."
+    
+    try:
+        # Resolve the absolute path
+        file_path = (REPORTS_DIR / filename).resolve()
+        
+        # 2. Input Validation & Refusal Boundary: Path Traversal Check
+        # This prevents a malicious LLM payload from passing filename="../../windows/system32/hack.md"
+        if not file_path.is_relative_to(REPORTS_DIR.resolve()):
+            return "REFUSED: Path traversal detected. You are strictly sandboxed to the audit_reports directory."
+            
+        # 3. The Side Effect: State Mutation
+        with open(file_path, "w", encoding="utf-8") as f:
+            f.write(content)
+            
+        return f"SUCCESS: Audit report securely saved to {file_path}"
+        
+    except Exception as e:
+        return f"ERROR: Failed to write file due to system error: {str(e)}"
 
 if __name__ == "__main__":
     # Run the server on standard I/O (stdio)

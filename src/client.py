@@ -63,7 +63,15 @@ class AuditorClient:
                     log_callback(f"Server exposed {len(groq_tools)} tools: {[t['function']['name'] for t in groq_tools]}")
 
                 messages = [
-                    {"role": "system", "content": "You are a Senior AI Software Engineer auditing GitHub repositories. Use the provided tools to explore the codebase and answer the user's questions comprehensively."},
+                    {
+                        "role": "system", 
+                        "content": (
+                            "You are a Senior AI Software Engineer auditing GitHub repositories. "
+                            "Use the provided tools to explore the codebase. "
+                            "Once you have gathered enough information, YOU MUST use the 'save_audit_report' "
+                            "tool to save your findings as a well-formatted Markdown file before answering the user."
+                        )
+                    },
                     {"role": "user", "content": query}
                 ]
 
