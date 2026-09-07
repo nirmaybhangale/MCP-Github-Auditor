@@ -1,24 +1,64 @@
 import streamlit as st
 import asyncio
-from src.client import AuditorClient
 import os
 import sys
+from pathlib import Path
 
+# --- WINDOWS ASYNCIO FIX ---
 if sys.platform == "win32":
     asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
+# ---------------------------
 
 from src.client import AuditorClient
+
+# Initialize page config - MUST be the first Streamlit command
+st.set_page_config(
+    page_title="MCP Auditor",
+    page_icon="🤖",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
 
 # Ensure API Key is present
 if not os.getenv("GROQ_API_KEY"):
     st.error("Please set GROQ_API_KEY in your .env file.")
     st.stop()
 
-st.set_page_config(page_title="Open-Source Auditor", page_icon="🔍")
-st.title("🔍 MCP Open-Source Auditor")
-st.markdown("Ask questions about any public GitHub repository. The LLM will autonomously navigate the code to answer.")
+# Define the reports directory
+REPORTS_DIR = Path.cwd() / "audit_reports"
+REPORTS_DIR.mkdir(exist_ok=True)
 
-# Initialize chat history and client
+# --- SIDEBAR: Workspace & Downloads ---
+with st.sidebar:
+    st.title("📂 Workspace")
+    st.markdown("Generated audit reports are saved here.")
+    st.divider()
+    
+    # Scan directory for generated reports
+    reports = list(REPORTS_DIR.glob("*.md"))
+    
+    if not reports:
+        st.info("No reports generated yet. Ask the auditor to analyze a repo and save a report.")
+    else:
+        for report in reports:
+            # Provide a download button for each report
+            with open(report, "r", encoding="utf-8") as f:
+                st.download_button(
+                    label=f"📄 {report.name}",
+                    data=f.read(),
+                    file_name=report.name,
+                    mime="text/markdown",
+                    use_container_width=True
+                )
+    
+    st.divider()
+    st.caption("Powered by Model Context Protocol")
+
+# --- MAIN LAYOUT: Title & Chat ---
+st.title("Open-Source Auditor")
+st.markdown("An AI agent powered by FastMCP. It autonomously explores GitHub repositories and writes comprehensive markdown reports.")
+
+# Initialize chat history
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
@@ -28,31 +68,38 @@ for msg in st.session_state.messages:
         st.markdown(msg["content"])
 
 # Handle new user input
-if prompt := st.chat_input("E.g., Analyze the structure of octocat/Hello-World"):
+if prompt := st.chat_input("E.g., Audit octocat/Hello-World and save a report..."):
     # Add user message to UI
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
 
     with st.chat_message("assistant"):
-        # Use st.status to show the "thought process" and tool logs
-        with st.status("Thinking and exploring...", expanded=True) as status_container:
+        # Use native st.status for a clean, expanding process tracker
+        with st.status("Executing MCP Protocol...", expanded=True) as status_container:
             log_placeholder = st.empty()
             
             def update_log(msg: str):
                 """Callback to push tool execution logs to the UI."""
-                log_placeholder.markdown(f"*{msg}*")
+                # Using a simple info box inside the status container looks much cleaner natively
+                log_placeholder.info(msg, icon="⚙️")
             
             try:
                 # Initialize client and run the async loop
                 client = AuditorClient()
                 final_answer = asyncio.run(client.process_query(prompt, log_callback=update_log))
-                status_container.update(label="Analysis complete!", state="complete", expanded=False)
+                
+                # Success state
+                status_container.update(label="Audit Complete", state="complete", expanded=False)
                 
                 # Display the final answer
                 st.markdown(final_answer)
                 st.session_state.messages.append({"role": "assistant", "content": final_answer})
                 
+                # Rerun to update the sidebar with any newly saved reports
+                st.rerun()
+                
             except Exception as e:
-                status_container.update(label="Error occurred", state="error")
-                st.error(f"An error occurred: {str(e)}")
+                # Error state
+                status_container.update(label="System Error", state="error", expanded=True)
+                st.error(f"Error during execution: {str(e)}")
