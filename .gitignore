@@ -1,0 +1,55 @@
+# -----------------------------
+# Secrets & Environments
+# -----------------------------
+.env
+.env.*
+.venv/
+venv/
+env/
+ENV/
+
+# -----------------------------
+# Streamlit
+# -----------------------------
+# Ignores local secrets while allowing other .streamlit configs (like config.toml)
+.streamlit/secrets.toml
+
+# -----------------------------
+# MCP Project Specific
+# -----------------------------
+# Ignore the side-effect generated reports
+audit_reports/
+
+# Ignore the temporary debugging scripts we made (remove these if you want to commit them)
+debug_client.py
+debug.py
+test_run.py
+
+# -----------------------------
+# Python Cache & Build
+# -----------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# -----------------------------
+# Testing
+# -----------------------------
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# -----------------------------
+# OS & IDE
+# -----------------------------
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
