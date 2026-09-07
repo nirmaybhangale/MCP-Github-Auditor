@@ -4,7 +4,7 @@ import os
 import sys
 from pathlib import Path
 
-# --- WINDOWS ASYNCIO FIX ---
+#windows asyncio fix
 if sys.platform == "win32":
     asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
 # ---------------------------
