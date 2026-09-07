@@ -1,4 +1,3 @@
-```markdown
 # 🔍 MCP Open-Source Auditor
 
 An AI-powered open-source codebase auditor built using the [Model Context Protocol (MCP)](https://modelcontextprotocol.io/). It autonomously navigates public GitHub repositories, reads codebase structures, analyzes issues, and securely writes markdown audit reports to a local file store.
@@ -47,10 +46,6 @@ sequenceDiagram
     Server-->>Client: Success Message
     Client->>LLM: Send tool result
     LLM-->>UI: Final synthesized analysis
-
-```
-
----
 
 ## 🧰 Available MCP Tools
 
