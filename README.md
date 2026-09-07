@@ -2,8 +2,6 @@
 
 An AI-powered open-source codebase auditor built using the [Model Context Protocol (MCP)](https://modelcontextprotocol.io/). It autonomously navigates public GitHub repositories, reads codebase structures, analyzes issues, and securely writes markdown audit reports to a local file store.
 
-![Demo Preview](demo.gif) *(Note: Add a screen recording or screenshot of your Streamlit UI here)*
-
 ---
 
 ## 🛡️ Assessment Criteria & Security

@@ -69,7 +69,9 @@ class AuditorClient:
                             "You are a Senior AI Software Engineer auditing GitHub repositories. "
                             "Use the provided tools to explore the codebase. "
                             "Once you have gathered enough information, YOU MUST use the 'save_audit_report' "
-                            "tool to save your findings as a well-formatted Markdown file before answering the user."
+                            "tool to save your findings as a well-formatted Markdown file. "
+                            "CRITICAL: After saving the file, you MUST ALSO output the full, detailed analysis "
+                            "directly in your final conversational response to the user so they can read it on the screen."
                         )
                     },
                     {"role": "user", "content": query}
