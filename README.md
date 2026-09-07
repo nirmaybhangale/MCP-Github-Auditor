@@ -46,7 +46,7 @@ sequenceDiagram
     Server-->>Client: Success Message
     Client->>LLM: Send tool result
     LLM-->>UI: Final synthesized analysis
-
+```
 ---
 
 ## 🧰 Available MCP Tools
